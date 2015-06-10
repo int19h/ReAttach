@@ -95,6 +95,7 @@ namespace ReAttach.Tests.Mocks
 			MockDefaultTransport.Setup(t => t.Engines).Returns(mockEngines.Object);
 			MockTransports = new Mock<Transports>();
 			MockTransports.Setup(t => t.Item("Default")).Returns(MockDefaultTransport.Object);
+            MockTransports.Setup(t => t.GetEnumerator()).Returns((new Transport[] { MockDefaultTransport.Object }.GetEnumerator()));
 			MockDTEDebugger.Setup(d => d.Transports).Returns(MockTransports.Object);
 
 			// Create sample processes to toy around with in tests.

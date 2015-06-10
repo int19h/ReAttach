@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace ReAttach.Data
 {
@@ -12,10 +13,27 @@ namespace ReAttach.Data
 		public string ProcessUser { get; set; }
 		public string ServerName { get; set; }
 		public bool IsAttached { get; set; }
-		public bool IsLocal { get { return string.IsNullOrEmpty(ServerName); } }
+        public Guid TransportId { get; set; }
+        public string TransportName { get; set; }
 		public List<Guid> Engines { get; set; }
 
-		public ReAttachTarget(int pid, string path, string user, string serverName = "") 
+        public bool IsDefaultTransport
+        {
+            get { return TransportId == ReAttachDebugger.DefaultPortSupplierId; }
+        }
+
+        public bool IsLocal
+        {
+            get { return IsDefaultTransport && string.IsNullOrEmpty(ServerName); }
+        }
+
+
+        public ReAttachTarget(int pid, string path, string user, string serverName = "")
+            : this(ReAttachDebugger.DefaultPortSupplierId, "Default", pid, path, user, serverName)
+        {
+        }
+
+		public ReAttachTarget(Guid transportId, string transportName, int pid, string path, string user, string serverName = "") 
 		{
 			try
 			{
@@ -29,6 +47,8 @@ namespace ReAttach.Data
 			ProcessPath = path;
 			ProcessUser = user ?? "";
 			ServerName = serverName ?? "";
+            TransportId = transportId;
+            TransportName = transportName;
 			Engines = new List<Guid>();
 		}
 
@@ -51,9 +71,21 @@ namespace ReAttach.Data
 
 		public override string ToString()
 		{
-			return IsLocal ? 
-				string.Format("{0} ({1})", ProcessName, ProcessUser) : 
-				string.Format("{0} ({1}@{2})", ProcessName, ProcessUser, ServerName);
+            var result = new StringBuilder(ProcessName);
+            result.Append(" (");
+
+            if (!string.IsNullOrEmpty(ProcessUser)) {
+                result.Append(ProcessUser + "@");
+            }
+
+            result.Append(ServerName);
+            result.Append(")");
+
+            if (!IsDefaultTransport && !string.IsNullOrEmpty(TransportName)) {
+                result.Append(" [" + TransportName + "]");
+            }
+
+            return result.ToString();
 		}
 	}
 }

@@ -67,9 +67,9 @@ namespace ReAttach.Data
 			_targets.Add(target);
 		}
 
-		public ReAttachTarget Find(int pid)
+		public ReAttachTarget Find(Guid transportId, string serverName, int pid)
 		{
-			return _targets.Find(p => p.ProcessId == pid);
+			return _targets.Find(p => p.TransportId == transportId && p.ServerName == serverName && p.ProcessId == pid);
 		}
 
 		public ReAttachTarget Find(string path, string user, string serverName)
